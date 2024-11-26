@@ -4,7 +4,7 @@ from datetime import datetime
 import config 
 
 #SERVICE_ACCOUNT_FILE = '/home/binal/Downloads/test-choreo-fe63423e6d06.json'
-#SPREADSHEET_ID = '1h_scq5Y5DWWqhlfUVmEjFOritg5QK0flcqEGvN4DBnQ'
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 
 def write_datetime_to_sheet():
     credentials = service_account.Credentials.from_service_account_file(
@@ -19,7 +19,7 @@ def write_datetime_to_sheet():
     body = {'values': values}
 
     result = sheet.values().append(
-        spreadsheetId=config.SPREADSHEET_ID,
+        spreadsheetId=SPREADSHEET_ID,
         range='Sheet1!A:A',
         valueInputOption='RAW',
         insertDataOption='INSERT_ROWS',
