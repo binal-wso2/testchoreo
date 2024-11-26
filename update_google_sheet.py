@@ -2,13 +2,14 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from datetime import datetime
 import config 
+import os
 
-#SERVICE_ACCOUNT_FILE = '/home/binal/Downloads/test-choreo-fe63423e6d06.json'
+SERVICE_ACCOUNT_FILE = '/home/binal/Downloads/test-choreo-fe63423e6d06.json'
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
 
 def write_datetime_to_sheet():
     credentials = service_account.Credentials.from_service_account_file(
-        config.SERVICE_ACCOUNT_FILE,
+        SERVICE_ACCOUNT_FILE,
         scopes=["https://www.googleapis.com/auth/spreadsheets"]
     )
     service = build('sheets', 'v4', credentials=credentials)
