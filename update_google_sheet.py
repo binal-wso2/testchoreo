@@ -1,7 +1,6 @@
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from datetime import datetime
-import config 
 import os
 
 SERVICE_ACCOUNT_FILE = '/home/binal/Downloads/test-choreo-fe63423e6d06.json'
