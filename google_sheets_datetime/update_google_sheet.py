@@ -4,8 +4,8 @@ from datetime import datetime
 import os
 
 SERVICE_ACCOUNT_FILE = '/home/binal/Downloads/test-choreo-fe63423e6d06.json'
-#SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
-SPREADSHEET_ID = '1h_scq5Y5DWWqhlfUVmEjFOritg5QK0flcqEGvN4DBnQ'
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
+#SPREADSHEET_ID = '1h_scq5Y5DWWqhlfUVmEjFOritg5QK0flcqEGvN4DBnQ'
 
 def write_datetime_to_sheet():
     credentials = service_account.Credentials.from_service_account_file(
