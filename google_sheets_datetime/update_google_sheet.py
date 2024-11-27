@@ -27,7 +27,7 @@ def write_datetime_to_sheet():
         body=body
     ).execute()
 
-    print(f"Appended {result.get('updates').get('updatedCells')} cell(s) with date and time: {now}")
+    print(f"Appended {result.get('updates').get('updatedCells')} cell(s) with date and time - changed: {now}")
 
 if __name__ == "__main__":
     write_datetime_to_sheet()
