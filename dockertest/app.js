@@ -25,11 +25,11 @@ app.post('/scan', (req, res) => {
     return res.status(400).json({ error: 'Invalid IP address format' });
   }
   
-  // Execute nmap command with sudo - scan only port 22
-  const command = `sudo nmap -sS -p 22 ${ipAddress}`;
+  // Execute nmap command - scan only port 22
+  const command = `nmap -sS -p 22 ${ipAddress}`;
   console.log(`Running command: ${command}`);
   
-  exec(command, { maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error}`);
       return res.status(500).json({ error: 'Scan failed', details: stderr });
