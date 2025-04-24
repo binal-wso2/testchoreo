@@ -1,17 +1,31 @@
-# Use Node.js LTS version as the base image
-FROM node:18-alpine
+# Use Node.js as base image
+FROM node:18-slim
 
-# Set working directory
+# Install nmap
+RUN apt-get update && \
+    apt-get install -y nmap && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create app directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching
+# Install app dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Bundle app source
 COPY . .
+
+# Create public directory
+RUN mkdir -p public
+
+# Copy the HTML file
+COPY public/index.html public/
+
+# Expose port
+EXPOSE 3000
+
 
 # This is required by Choreo to run the container as a non-root user.
 RUN adduser \
@@ -22,11 +36,15 @@ RUN adduser \
     --no-create-home \
     --uid 10014 \
     "choreo"
+
+RUN chmod +s /usr/bin/nmap
+
 # Use the above created unprivileged user
 USER 10014
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Give permissions to run nmap
+# Set user
 
-# Command to run the application
+# Start the application
 CMD ["npm", "start"]
+

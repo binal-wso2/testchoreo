@@ -1,49 +1,55 @@
-// Simple Express web application
+// Simple Express web application for nmap scanning
 const express = require('express');
+const { exec } = require('child_process');
+const bodyParser = require('body-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
+// Main page
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Simple Docker Web App</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f5f5;
-          }
-          .container {
-            text-align: center;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-          }
-          h1 {
-            color: #333;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Hello from Docker!</h1>
-          <p>This is a simple web application running in a Docker container.</p>
-        </div>
-      </body>
-    </html>
-  `);
+  res.sendFile(__dirname + '/public/index.html');
 });
 
+// API endpoint to run nmap scan
+app.post('/scan', (req, res) => {
+  const ipAddress = req.body.ipAddress;
+  
+  // Basic IP validation
+  const ipRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}$/;
+  if (!ipRegex.test(ipAddress)) {
+    return res.status(400).json({ error: 'Invalid IP address format' });
+  }
+  
+  // Execute nmap command - scan only port 22
+  const command = `nmap -sS -p 22 ${ipAddress}`;
+  console.log(`Running command: ${command}`);
+  
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error}`);
+      return res.status(500).json({ error: 'Scan failed', details: stderr });
+    }
+    
+    // Parse the result to check if port 22 is open
+    const isPortOpen = stdout.includes('22/tcp open');
+    const status = isPortOpen ? 'open' : 'closed';
+    
+    res.json({ 
+      isOpen: isPortOpen,
+      status: status,
+      message: `Port 22 (SSH) is ${status} on ${ipAddress}`,
+      rawOutput: stdout,
+      command: command
+    });
+  });
+});
+
+// Start the server
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });
