@@ -1,0 +1,9 @@
+version: '3'
+services:
+  ssh-scanner:
+    build: .
+    ports:
+      - "3000:3000"
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
