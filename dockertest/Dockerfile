@@ -1,37 +1,20 @@
-# Use Node.js as base image
-FROM node:18-slim
+# Use Node.js LTS version as the base image
+FROM node:18-alpine
 
-# Install nmap
-RUN apt-get update && \
-    apt-get install -y nmap && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Install app dependencies
+# Copy package.json and package-lock.json first for better caching
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Bundle app source
+# Copy the rest of the application code
 COPY . .
 
-# Create public directory
-RUN mkdir -p public
-
-# Copy the HTML file
-COPY public/index.html public/
-
-# Expose port
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Set non-root user for better security
-RUN groupadd -r nmapuser && useradd -r -g nmapuser nmapuser
-# Give permissions to run nmap
-RUN chmod +s /usr/bin/nmap
-# Set user
-USER nmapuser
-
-# Start the application
+# Command to run the application
 CMD ["npm", "start"]

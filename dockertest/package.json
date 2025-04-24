@@ -1,13 +1,12 @@
 {
-  "name": "nmap-scanner-web",
+  "name": "docker-web-app",
   "version": "1.0.0",
-  "description": "Web UI for running nmap port scans",
+  "description": "A simple web application for Docker demonstration",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "body-parser": "^1.20.2"
+    "express": "^4.18.2"
   }
 }
