@@ -25,8 +25,8 @@ app.post('/scan', (req, res) => {
     return res.status(400).json({ error: 'Invalid IP address format' });
   }
   
-  // Execute nmap command - scan only port 22
-  const command = `nmap -sS -p 22 ${ipAddress}`;
+  // Execute nmap command - scan all ports
+  const command = `nmap --open ${ipAddress}`;
   console.log(`Running command: ${command}`);
   
   exec(command, (error, stdout, stderr) => {
@@ -35,14 +35,18 @@ app.post('/scan', (req, res) => {
       return res.status(500).json({ error: 'Scan failed', details: stderr });
     }
     
-    // Parse the result to check if port 22 is open
-    const isPortOpen = stdout.includes('22/tcp open');
-    const status = isPortOpen ? 'open' : 'closed';
+    // Parse the result to check for open ports
+    const openPortsRegex = /(\d+)\/tcp\s+open/g;
+    let match;
+    const openPorts = [];
+    while ((match = openPortsRegex.exec(stdout)) !== null) {
+      openPorts.push(match[1]);
+    }
     
     res.json({ 
-      isOpen: isPortOpen,
-      status: status,
-      message: `Port 22 (SSH) is ${status} on ${ipAddress}`,
+      openPorts: openPorts,
+      openPortsCount: openPorts.length,
+      message: `Found ${openPorts.length} open port(s) on ${ipAddress}`,
       rawOutput: stdout,
       command: command
     });

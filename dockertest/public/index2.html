@@ -98,16 +98,16 @@
 </head>
 <body>
   <div class="container">
-    <h1>Port Scanner</h1>
+    <h1>SSH Port Scanner</h1>
     
     <div class="form-group">
       <label for="ipAddress">IP Address:</label>
       <input type="text" id="ipAddress" name="ipAddress" placeholder="e.g., 192.168.1.1">
     </div>
     
-    <button id="scanBtn" onclick="runScan()">Scan All Ports</button>
+    <button id="scanBtn" onclick="runScan()">Check SSH Port (22)</button>
     
-    <div id="loading" class="loading">Scanning all ports... This may take several minutes.</div>
+    <div id="loading" class="loading">Checking if port 22 is open...</div>
     <div id="error" class="error"></div>
     
     <div id="status" class="status"></div>
@@ -157,13 +157,9 @@
         loadingElement.style.display = 'none';
         scanButton.disabled = false;
         
-        // Display status of open ports
-        let statusMessage = data.message;
-        if (data.openPorts.length > 0) {
-          statusMessage += '<br><br>Open ports: ' + data.openPorts.join(', ');
-        }
-        statusElement.innerHTML = statusMessage;
-        statusElement.className = data.openPorts.length > 0 ? 'status open' : 'status closed';
+        // Display status prominently
+        statusElement.textContent = data.message;
+        statusElement.className = data.isOpen ? 'status open' : 'status closed';
         statusElement.style.display = 'block';
         
         // Display raw output for details
