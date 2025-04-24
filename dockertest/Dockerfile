@@ -26,6 +26,7 @@ COPY public/index.html public/
 # Expose port
 EXPOSE 3000
 
+RUN setcap cap_net_raw,cap_net_admin+eip /usr/bin/nmap
 
 # This is required by Choreo to run the container as a non-root user.
 RUN adduser \
