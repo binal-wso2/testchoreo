@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Network Scanner</title>
+  <title>Automatic Network Scanner</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     :root {
@@ -23,7 +23,7 @@
       color: #333;
     }
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -46,29 +46,6 @@
     }
     .card-body {
       padding: 20px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: var(--dark-color);
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-      box-sizing: border-box;
-      transition: border-color 0.3s;
-    }
-    input[type="text"]:focus {
-      border-color: var(--secondary-color);
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
     }
     button {
       background-color: var(--secondary-color);
@@ -95,8 +72,9 @@
       cursor: not-allowed;
     }
     .loading {
-      display: none;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
       font-weight: 600;
       color: var(--primary-color);
@@ -123,10 +101,6 @@
       border-left: 4px solid var(--danger-color);
       margin: 15px 0;
     }
-    .results-section {
-      display: none;
-      margin-top: 30px;
-    }
     .scan-summary {
       display: flex;
       margin-bottom: 20px;
@@ -152,23 +126,103 @@
       font-size: 14px;
       color: #7f8c8d;
     }
-    .ports-table {
+    .host-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .host-header {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+    }
+    .host-title {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .host-title i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+    .host-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pending {
+      background-color: #e3f2fd;
+      color: var(--secondary-color);
+    }
+    .status-complete {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+    }
+    .status-error {
+      background-color: #fdecea;
+      color: var(--danger-color);
+    }
+    .host-body {
+      padding: 15px;
+    }
+    .host-info {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .info-item {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 10px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 5px;
+    }
+    .port-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 15px;
     }
-    .ports-table th, .ports-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #ddd;
+    .port-table th, .port-table td {
+      padding: 10px;
       text-align: left;
+      border-bottom: 1px solid #ddd;
     }
-    .ports-table th {
+    .port-table th {
+      background-color: #f8f9fa;
       font-weight: 600;
       color: var(--primary-color);
+    }
+    .port-table tr:hover {
       background-color: #f8f9fa;
     }
-    .ports-table tr:hover {
-      background-color: #f8f9fa;
+    .toggle-details {
+      background: none;
+      border: none;
+      color: var(--secondary-color);
+      padding: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-details:hover {
+      text-decoration: underline;
+    }
+    .host-details {
+      display: none;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
     }
     .raw-output {
       background-color: #2c3e50;
@@ -178,91 +232,104 @@
       font-family: monospace;
       white-space: pre-wrap;
       overflow-x: auto;
-      margin-top: 20px;
       font-size: 14px;
       line-height: 1.6;
-      max-height: 400px;
+      max-height: 300px;
       overflow-y: auto;
     }
-    .badge {
+    .info-pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background-color: #f8f9fa;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .tab-container {
+      margin-top: 15px;
+    }
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab-button {
+      padding: 10px 15px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+    }
+    .tab-button.active {
+      color: var(--secondary-color);
+      border-bottom-color: var(--secondary-color);
+    }
+    .tab-content {
+      display: none;
+      padding: 15px 0;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .port-badge {
       display: inline-block;
       padding: 3px 8px;
       border-radius: 12px;
       font-size: 12px;
       font-weight: 600;
-      margin-left: 5px;
-    }
-    .badge-success {
       background-color: #e8f5e9;
       color: var(--success-color);
     }
-    .badge-danger {
-      background-color: #fdecea;
-      color: var(--danger-color);
+    .scan-progress {
+      height: 4px;
+      width: 100%;
+      background-color: #ecf0f1;
+      margin-top: 10px;
+      border-radius: 2px;
+      overflow: hidden;
     }
-    .badge-warning {
-      background-color: #fff8e1;
-      color: var(--warning-color);
+    .progress-bar {
+      height: 100%;
+      background-color: var(--secondary-color);
+      width: 0%;
+      transition: width 0.5s;
     }
-    .badge-progress {
-      background-color: #e3f2fd;
-      color: var(--secondary-color);
+    .scan-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
-    .badge-lg {
-      font-size: 14px;
-      padding: 5px 10px;
-    }
-    .os-details {
-      background-color: #f8f9fa;
-      padding: 15px;
-      border-radius: 4px;
-      margin-top: 20px;
-    }
-    .os-details h3 {
-      margin-top: 0;
-      color: var(--primary-color);
-    }
-    .toggle-raw {
+    .refresh-button {
+      background: none;
+      border: none;
       color: var(--secondary-color);
       cursor: pointer;
-      display: inline-block;
-      margin-top: 15px;
-      font-weight: 600;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      padding: 5px;
     }
-    .toggle-raw:hover {
+    .refresh-button:hover {
       text-decoration: underline;
     }
-    .footnote {
-      font-size: 12px;
-      color: #95a5a6;
-      text-align: center;
-      margin-top: 40px;
-    }
-    .status-indicator {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 10px;
-    }
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+    .refresh-button i {
       margin-right: 5px;
     }
-    .status-dot.running {
-      background-color: var(--warning-color);
-    }
-    .status-dot.complete {
-      background-color: var(--success-color);
-    }
-    .status-dot.error {
-      background-color: var(--danger-color);
-    }
-    .status-dot.waiting {
-      background-color: #95a5a6;
+    .network-range {
+      padding: 5px 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-family: monospace;
+      margin-left: 10px;
     }
     @media (max-width: 768px) {
       .summary-card {
+        min-width: 100%;
+      }
+      .info-item {
         min-width: 100%;
       }
     }
@@ -272,336 +339,298 @@
   <div class="container">
     <div class="card">
       <div class="card-header">
-        <span><i class="fas fa-network-wired"></i> Advanced Network Scanner</span>
+        <span><i class="fas fa-network-wired"></i> Network Scanner</span>
       </div>
       <div class="card-body">
-        <div class="form-group">
-          <label for="ipAddress">Target IP Address:</label>
-          <input type="text" id="ipAddress" name="ipAddress" placeholder="e.g., 192.168.1.1">
+        <div class="scan-status">
+          <div>
+            <span>Scanning Network:</span>
+            <span id="networkRange" class="network-range">192.168.1.0/24</span>
+          </div>
+          <button id="refreshBtn" class="refresh-button" onclick="refreshStatus()">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+          </button>
         </div>
         
-        <button id="scanBtn" onclick="startScans()">
-          <i class="fas fa-search"></i> Start Scanning
-        </button>
+        <div class="scan-progress">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
         
-        <div id="loadingPortScan" class="loading">
-          <div class="spinner"></div> Port scan in progress... This may take several minutes to complete.
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <span id="loadingText">Scanning network... this may take several minutes</span>
         </div>
-        <div id="loadingOsScan" class="loading">
-          <div class="spinner"></div> OS and service detection in progress... This may take several minutes to complete.
-        </div>
-        <div id="error" class="error"></div>
       </div>
     </div>
     
-    <!-- Port Scan Results Section -->
-    <div id="portScanSection" class="results-section">
+    <div id="resultsContainer" style="display: none;">
       <div class="card">
         <div class="card-header">
-          <span>Port Scan Results</span>
-          <div class="status-indicator">
-            <div id="portScanStatusDot" class="status-dot waiting"></div>
-            <span id="portScanStatus">Waiting</span>
-          </div>
+          <span>Scan Results</span>
+          <span id="scanTime"></span>
         </div>
         <div class="card-body">
           <div class="scan-summary">
             <div class="summary-card">
-              <div id="openPortsCount" class="value">0</div>
-              <div class="label">Open Ports</div>
+              <div id="hostCount" class="value">0</div>
+              <div class="label">Hosts Discovered</div>
             </div>
             <div class="summary-card">
-              <div id="portScanDuration" class="value">0s</div>
-              <div class="label">Scan Duration</div>
+              <div id="osCount" class="value">0</div>
+              <div class="label">OS Identified</div>
+            </div>
+            <div class="summary-card">
+              <div id="portCount" class="value">0</div>
+              <div class="label">Open Ports</div>
             </div>
           </div>
           
-          <h3>Open Ports</h3>
-          <div id="noPortsMessage" style="display: none; margin-bottom: 20px;">No open ports found.</div>
-          <table id="portsTable" class="ports-table">
-            <thead>
-              <tr>
-                <th>Port</th>
-                <th>Service</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="portsTableBody">
-              <!-- Port data will be inserted here -->
-            </tbody>
-          </table>
-          
-          <div class="toggle-raw" onclick="toggleRawOutput('portScan')">
-            <i class="fas fa-code"></i> Show Raw Output
+          <div id="hostsContainer">
+            <!-- Host cards will be added here dynamically -->
           </div>
-          <div id="portScanRawOutput" class="raw-output" style="display: none;"></div>
         </div>
       </div>
     </div>
     
-    <!-- OS Detection Results Section -->
-    <div id="osDetectionSection" class="results-section">
-      <div class="card">
-        <div class="card-header">
-          <span>OS & Service Detection Results</span>
-          <div class="status-indicator">
-            <div id="osDetectionStatusDot" class="status-dot waiting"></div>
-            <span id="osDetectionStatus">Waiting</span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="os-details">
-            <h3>Operating System</h3>
-            <p id="osDetails">Waiting for scan results...</p>
-          </div>
-          
-          <h3>Service Versions</h3>
-          <div id="noServicesMessage" style="display: none; margin-bottom: 20px;">No service version information available.</div>
-          <table id="serviceVersionsTable" class="ports-table">
-            <thead>
-              <tr>
-                <th>Port</th>
-                <th>Service</th>
-                <th>Version</th>
-              </tr>
-            </thead>
-            <tbody id="serviceVersionsTableBody">
-              <!-- Service version data will be inserted here -->
-            </tbody>
-          </table>
-          
-          <div class="toggle-raw" onclick="toggleRawOutput('osDetection')">
-            <i class="fas fa-code"></i> Show Raw Output
-          </div>
-          <div id="osDetectionRawOutput" class="raw-output" style="display: none;"></div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="footnote">
-      Note: Only scan IP addresses you have permission to scan. Unauthorized scanning may be illegal in some jurisdictions.
-    </div>
+    <div id="error" class="error"></div>
   </div>
 
   <script>
-    // Timing variables
-    let portScanStartTime = 0;
-    let osDetectionStartTime = 0;
-    let targetIpAddress = '';
+    // Global variables
+    let hosts = [];
+    let scanStartTime = new Date();
+    let scanInterval;
+    let progressValue = 0;
     
-    // Start the port scan first, then OS detection
-    function startScans() {
-      targetIpAddress = document.getElementById('ipAddress').value.trim();
+    // On page load, start the automatic scan
+    window.onload = function() {
+      startAutoScan();
+      
+      // Set up polling for scan status
+      scanInterval = setInterval(updateScanStatus, 5000);
+      
+      // Set up progress bar animation
+      animateProgress();
+    };
+    
+    // Start the automatic network scan
+    function startAutoScan() {
       const errorElement = document.getElementById('error');
-      const scanButton = document.getElementById('scanBtn');
-      
-      // Basic validation
-      if (!targetIpAddress) {
-        errorElement.textContent = 'Please enter an IP address';
-        errorElement.style.display = 'block';
-        return;
-      }
-      
-      // Hide error
       errorElement.style.display = 'none';
       
-      // Disable button
-      scanButton.disabled = true;
-      
-      // Reset and show sections
-      resetSections();
-      document.getElementById('portScanSection').style.display = 'block';
-      document.getElementById('osDetectionSection').style.display = 'block';
-      
-      // Update status indicators
-      updateStatus('portScan', 'running', 'Running');
-      updateStatus('osDetection', 'waiting', 'Waiting');
-      
-      // Show loading indicator for port scan only
-      document.getElementById('loadingPortScan').style.display = 'block';
-      document.getElementById('loadingOsScan').style.display = 'none';
-      
-      // Start port scan timer
-      portScanStartTime = new Date().getTime();
-      
-      // Start port scan first
-      runPortScan();
+      fetch('/auto-scan')
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => Promise.reject(data));
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Store the hosts data
+          hosts = data.hostDiscovery.hosts;
+          
+          // Update the UI with initial host count
+          document.getElementById('hostCount').textContent = hosts.length;
+          
+          // Start checking scan status immediately
+          updateScanStatus();
+        })
+        .catch(error => {
+          handleError('auto scan', error);
+        });
     }
     
-    // Reset sections for new scan
-    function resetSections() {
-      // Reset port scan section
-      document.getElementById('openPortsCount').textContent = '0';
-      document.getElementById('portScanDuration').textContent = '0s';
-      document.getElementById('portsTableBody').innerHTML = '';
-      document.getElementById('portScanRawOutput').textContent = '';
-      document.getElementById('portScanRawOutput').style.display = 'none';
-      
-      // Reset OS detection section
-      document.getElementById('osDetails').textContent = 'Waiting for scan results...';
-      document.getElementById('serviceVersionsTableBody').innerHTML = '';
-      document.getElementById('osDetectionRawOutput').textContent = '';
-      document.getElementById('osDetectionRawOutput').style.display = 'none';
+    // Update the scan status
+    function updateScanStatus() {
+      fetch('/scan-status')
+        .then(response => response.json())
+        .then(data => {
+          if (!data.scanInProgress) {
+            // Scan complete, refresh the UI
+            clearInterval(scanInterval);
+            document.getElementById('loadingText').textContent = 'Scan complete! Processing results...';
+            
+            // Set progress to 100%
+            progressValue = 100;
+            document.getElementById('progressBar').style.width = '100%';
+            
+            // Wait a moment then display results
+            setTimeout(() => {
+              displayResults();
+            }, 1000);
+          }
+        })
+        .catch(error => {
+          console.error('Error checking scan status:', error);
+        });
     }
     
-    // Run port scan
-    function runPortScan() {
-      fetch('/port-scan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ipAddress: targetIpAddress }),
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(data => Promise.reject(data));
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Calculate scan duration
-        const scanDuration = Math.round((new Date().getTime() - portScanStartTime) / 1000);
-        
-        // Hide loading
-        document.getElementById('loadingPortScan').style.display = 'none';
-        
-        // Update status
-        updateStatus('portScan', 'complete', 'Complete');
-        
-        // Update scan summary
-        document.getElementById('openPortsCount').textContent = data.openPortsCount;
-        document.getElementById('portScanDuration').textContent = scanDuration + 's';
-        
-        // Show or hide the "no ports" message
-        const noPortsMessage = document.getElementById('noPortsMessage');
-        const portsTable = document.getElementById('portsTable');
-        
-        if (data.openPorts.length === 0) {
-          noPortsMessage.style.display = 'block';
-          portsTable.style.display = 'none';
-        } else {
-          noPortsMessage.style.display = 'none';
-          portsTable.style.display = 'table';
+    // Manually refresh the status
+    function refreshStatus() {
+      updateScanStatus();
+    }
+    
+    // Animate the progress bar
+    function animateProgress() {
+      const progressBar = document.getElementById('progressBar');
+      
+      // Start with a slow increment that speeds up over time
+      setInterval(() => {
+        if (progressValue < 90) {
+          // Calculate increment - slower at start, faster as we approach 90%
+          const increment = progressValue < 30 ? 0.2 : 
+                           progressValue < 60 ? 0.5 : 
+                           progressValue < 85 ? 0.1 : 0.05;
           
-          // Populate ports table
-          const portsTableBody = document.getElementById('portsTableBody');
-          portsTableBody.innerHTML = '';
-          
-          data.openPorts.forEach(port => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${port.port}</td>
-              <td>${port.service}</td>
-              <td><span class="badge badge-success">Open</span></td>
-            `;
-            portsTableBody.appendChild(row);
-          });
+          progressValue += increment;
+          progressBar.style.width = `${progressValue}%`;
         }
-        
-        // Set raw output
-        document.getElementById('portScanRawOutput').textContent = data.rawOutput;
-        
-        // Now start the OS detection scan
-        updateStatus('osDetection', 'running', 'Running');
-        document.getElementById('loadingOsScan').style.display = 'block';
-        osDetectionStartTime = new Date().getTime();
-        runOsDetection();
-      })
-      .catch(error => {
-        // Hide loading
-        document.getElementById('loadingPortScan').style.display = 'none';
-        
-        // Update status
-        updateStatus('portScan', 'error', 'Error');
-        
-        // Show error
-        handleError('port scan', error);
-        
-        // Enable scan button
-        document.getElementById('scanBtn').disabled = false;
+      }, 200);
+    }
+    
+    // Display the final results
+    function displayResults() {
+      // Calculate scan duration
+      const scanDuration = Math.round((new Date() - scanStartTime) / 1000);
+      document.getElementById('scanTime').textContent = `Completed in ${scanDuration}s`;
+      
+      // Count identified OS and open ports
+      let osIdentifiedCount = 0;
+      let totalOpenPorts = 0;
+      
+      hosts.forEach(host => {
+        if (host.os !== 'Unknown') {
+          osIdentifiedCount++;
+        }
+        totalOpenPorts += host.openPorts.length;
       });
+      
+      // Update summary counts
+      document.getElementById('osCount').textContent = osIdentifiedCount;
+      document.getElementById('portCount').textContent = totalOpenPorts;
+      
+      // Generate host cards
+      const hostsContainer = document.getElementById('hostsContainer');
+      hostsContainer.innerHTML = '';
+      
+      hosts.forEach(host => {
+        // Create host card
+        const hostCard = document.createElement('div');
+        hostCard.className = 'host-card';
+        
+        // Determine status class
+        const statusClass = host.status === 'Complete' ? 'status-complete' :
+                           host.status === 'Error' ? 'status-error' : 'status-pending';
+        
+        // Create card content
+        hostCard.innerHTML = `
+          <div class="host-header">
+            <div class="host-title">
+              <i class="fas fa-desktop"></i>
+              ${host.ip} ${host.hostname ? `(${host.hostname})` : ''}
+            </div>
+            <span class="host-status ${statusClass}">${host.status}</span>
+          </div>
+          <div class="host-body">
+            <div class="host-info">
+              <div class="info-item">
+                <div class="info-label">Operating System</div>
+                <div>${host.os}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Open Ports</div>
+                <div>${host.openPorts.length} ports detected</div>
+              </div>
+            </div>
+            
+            ${host.openPorts.length > 0 ? `
+              <h4>Open Ports & Services</h4>
+              <table class="port-table">
+                <thead>
+                  <tr>
+                    <th>Port</th>
+                    <th>Service</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${host.openPorts.map(port => `
+                    <tr>
+                      <td><span class="port-badge">${port.port}</span></td>
+                      <td>${port.service}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : ''}
+            
+            <button class="toggle-details" onclick="toggleHostDetails('${host.ip}')">
+              <i class="fas fa-code"></i> View Scan Details
+            </button>
+            
+            <div id="details-${host.ip.replace(/\./g, '-')}" class="host-details">
+              <div class="tab-container">
+                <div class="tab-buttons">
+                  <button class="tab-button active" onclick="showTab('${host.ip}', 'os')">OS Detection</button>
+                  <button class="tab-button" onclick="showTab('${host.ip}', 'ports')">Port Scan</button>
+                </div>
+                <div id="tab-${host.ip.replace(/\./g, '-')}-os" class="tab-content active">
+                  <div class="raw-output">${host.osDetectionOutput || 'No data available'}</div>
+                </div>
+                <div id="tab-${host.ip.replace(/\./g, '-')}-ports" class="tab-content">
+                  <div class="raw-output">${host.portScanOutput || 'No data available'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        hostsContainer.appendChild(hostCard);
+      });
+      
+      // Hide loading and show results
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
     }
     
-    // Run OS detection
-    function runOsDetection() {
-      fetch('/os-detection', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ipAddress: targetIpAddress }),
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(data => Promise.reject(data));
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Calculate scan duration
-        const scanDuration = Math.round((new Date().getTime() - osDetectionStartTime) / 1000);
-        
-        // Hide loading
-        document.getElementById('loadingOsScan').style.display = 'none';
-        
-        // Update status
-        updateStatus('osDetection', 'complete', 'Complete');
-        
-        // Update OS details
-        document.getElementById('osDetails').textContent = data.os || 'Could not determine OS';
-        
-        // Populate service versions table
-        const serviceVersionsTableBody = document.getElementById('serviceVersionsTableBody');
-        serviceVersionsTableBody.innerHTML = '';
-        
-        const serviceVersions = data.serviceVersions || {};
-        const serviceKeys = Object.keys(serviceVersions);
-        
-        if (serviceKeys.length === 0) {
-          document.getElementById('noServicesMessage').style.display = 'block';
-          document.getElementById('serviceVersionsTable').style.display = 'none';
-        } else {
-          document.getElementById('noServicesMessage').style.display = 'none';
-          document.getElementById('serviceVersionsTable').style.display = 'table';
-          
-          serviceKeys.forEach(port => {
-            const service = serviceVersions[port];
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${port}</td>
-              <td>${service.service}</td>
-              <td>${service.version || 'Unknown'}</td>
-            `;
-            serviceVersionsTableBody.appendChild(row);
-          });
-        }
-        
-        // Set raw output
-        document.getElementById('osDetectionRawOutput').textContent = data.rawOutput;
-        
-        // Re-enable scan button now that all scans are done
-        document.getElementById('scanBtn').disabled = false;
-      })
-      .catch(error => {
-        // Hide loading
-        document.getElementById('loadingOsScan').style.display = 'none';
-        
-        // Update status
-        updateStatus('osDetection', 'error', 'Error');
-        
-        // Show error
-        handleError('OS detection', error);
-        
-        // Re-enable scan button
-        document.getElementById('scanBtn').disabled = false;
+    // Toggle host details view
+    function toggleHostDetails(ip) {
+      const detailsId = `details-${ip.replace(/\./g, '-')}`;
+      const detailsElement = document.getElementById(detailsId);
+      
+      if (detailsElement.style.display === 'block') {
+        detailsElement.style.display = 'none';
+      } else {
+        detailsElement.style.display = 'block';
+      }
+    }
+    
+    // Show tab content
+    function showTab(ip, tabName) {
+      const ipSelector = ip.replace(/\./g, '-');
+      
+      // Hide all tab contents
+      document.querySelectorAll(`[id^="tab-${ipSelector}-"]`).forEach(tab => {
+        tab.classList.remove('active');
       });
+      
+      // Show selected tab content
+      document.getElementById(`tab-${ipSelector}-${tabName}`).classList.add('active');
+      
+      // Update tab buttons
+      const tabContainer = document.getElementById(`tab-${ipSelector}-${tabName}`).parentNode;
+      const buttons = tabContainer.querySelectorAll('.tab-button');
+      
+      buttons.forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      event.currentTarget.classList.add('active');
     }
     
     // Handle errors
-    function handleError(scanType, error) {
+    function handleError(action, error) {
       const errorElement = document.getElementById('error');
-      let errorMessage = `An error occurred during the ${scanType}`;
+      let errorMessage = `An error occurred during the ${action}`;
       
       if (error.error) {
         errorMessage += ': ' + error.error;
@@ -612,33 +641,9 @@
       
       errorElement.textContent = errorMessage;
       errorElement.style.display = 'block';
-    }
-    
-    // Update status indicators
-    function updateStatus(type, state, text) {
-      const statusDot = document.getElementById(`${type}StatusDot`);
-      const statusText = document.getElementById(`${type}Status`);
       
-      // Remove all classes
-      statusDot.classList.remove('waiting', 'running', 'complete', 'error');
-      
-      // Add new class
-      statusDot.classList.add(state);
-      
-      // Update text
-      statusText.textContent = text;
-    }
-    
-    // Toggle raw output display
-    function toggleRawOutput(type) {
-      const rawOutput = document.getElementById(`${type}RawOutput`);
-      const isHidden = rawOutput.style.display === 'none';
-      rawOutput.style.display = isHidden ? 'block' : 'none';
-      
-      const toggleElement = rawOutput.previousElementSibling;
-      toggleElement.innerHTML = isHidden
-        ? '<i class="fas fa-code"></i> Hide Raw Output'
-        : '<i class="fas fa-code"></i> Show Raw Output';
+      // Hide loading
+      document.getElementById('loading').style.display = 'none';
     }
   </script>
 </body>
