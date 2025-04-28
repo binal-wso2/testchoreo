@@ -3,78 +3,633 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Network Scanner</title>
+  <title>Automatic Network Scanner</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --success-color: #27ae60;
+      --danger-color: #e74c3c;
+      --warning-color: #f1c40f;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+    }
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
+      padding: 0;
+      background-color: #f5f7fa;
+      color: #333;
     }
     .container {
-      max-width: 800px;
+      max-width: 1200px;
       margin: 0 auto;
-      background-color: white;
       padding: 20px;
+    }
+    .card {
+      background-color: white;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 15px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-body {
+      padding: 20px;
+    }
+    button {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    button i {
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
     }
     .loading {
-      text-align: center;
-      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--secondary-color);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     .error {
-      color: red;
-      margin-top: 10px;
+      display: none;
+      color: var(--danger-color);
+      background-color: #fdecea;
+      padding: 15px;
+      border-radius: 4px;
+      border-left: 4px solid var(--danger-color);
+      margin: 15px 0;
     }
-    .results {
-      margin-top: 20px;
+    .scan-summary {
+      display: flex;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .summary-card {
+      flex: 1;
+      min-width: 200px;
+      margin: 10px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+    .summary-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 10px 0;
+    }
+    .summary-card .label {
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    .host-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .host-header {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+    }
+    .host-title {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .host-title i {
+      margin-right: 10px;
+      color: var(--primary-color);
+    }
+    .host-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pending {
+      background-color: #e3f2fd;
+      color: var(--secondary-color);
+    }
+    .status-complete {
+      background-color: #e8f5e9;
+      color: var(--success-color);
+    }
+    .status-error {
+      background-color: #fdecea;
+      color: var(--danger-color);
+    }
+    .host-body {
+      padding: 15px;
+    }
+    .host-info {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .info-item {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 10px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 5px;
+    }
+    .port-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .port-table th, .port-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .port-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    .port-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    .toggle-details {
+      background: none;
+      border: none;
+      color: var(--secondary-color);
+      padding: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .toggle-details:hover {
+      text-decoration: underline;
+    }
+    .host-details {
+      display: none;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+    .raw-output {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .info-pill {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background-color: #f8f9fa;
+      margin-right: 5px;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .tab-container {
+      margin-top: 15px;
+    }
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab-button {
+      padding: 10px 15px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+    }
+    .tab-button.active {
+      color: var(--secondary-color);
+      border-bottom-color: var(--secondary-color);
+    }
+    .tab-content {
+      display: none;
+      padding: 15px 0;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .port-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background-color: #e8f5e9;
+      color: var(--success-color);
+    }
+    .scan-progress {
+      height: 4px;
+      width: 100%;
+      background-color: #ecf0f1;
+      margin-top: 10px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: var(--secondary-color);
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .scan-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .refresh-button {
+      background: none;
+      border: none;
+      color: var(--secondary-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      padding: 5px;
+    }
+    .refresh-button:hover {
+      text-decoration: underline;
+    }
+    .refresh-button i {
+      margin-right: 5px;
+    }
+    .network-range {
+      padding: 5px 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-family: monospace;
+      margin-left: 10px;
+    }
+    @media (max-width: 768px) {
+      .summary-card {
+        min-width: 100%;
+      }
+      .info-item {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Network Scanner</h1>
-    <p>Scanning network: <span id="networkRange">Loading...</span></p>
-    <div id="loading" class="loading">Scanning the network...</div>
-    <div id="error" class="error" style="display: none;"></div>
-    <div id="results" class="results" style="display: none;"></div>
+    <div class="card">
+      <div class="card-header">
+        <span><i class="fas fa-network-wired"></i> Network Scanner</span>
+      </div>
+      <div class="card-body">
+        <div class="scan-status">
+          <div>
+            <span>Scanning Network Devices from ARP Cache</span>
+          </div>
+          <button id="refreshBtn" class="refresh-button" onclick="refreshStatus()">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+          </button>
+        </div>
+        
+        <div class="scan-progress">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <span id="loadingText">Scanning network... this may take several minutes</span>
+        </div>
+      </div>
+    </div>
+    
+    <div id="resultsContainer" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <span>Scan Results</span>
+          <span id="scanTime"></span>
+        </div>
+        <div class="card-body">
+          <div class="scan-summary">
+            <div class="summary-card">
+              <div id="hostCount" class="value">0</div>
+              <div class="label">Hosts Discovered</div>
+            </div>
+            <div class="summary-card">
+              <div id="osCount" class="value">0</div>
+              <div class="label">OS Identified</div>
+            </div>
+            <div class="summary-card">
+              <div id="portCount" class="value">0</div>
+              <div class="label">Open Ports</div>
+            </div>
+          </div>
+          
+          <div id="hostsContainer">
+            <!-- Host cards will be added here dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="error" class="error"></div>
   </div>
 
   <script>
-    function fetchScanResults() {
+    // Global variables
+    let hosts = [];
+    let scanStartTime = new Date();
+    let scanInterval;
+    let progressValue = 0;
+    
+    // On page load, start the automatic scan
+    window.onload = function() {
+      // Set up polling for scan status
+      updateScanStatus();
+      scanInterval = setInterval(updateScanStatus, 3000);
+    };
+    
+    // Start the automatic network scan
+    function startAutoScan() {
+      const errorElement = document.getElementById('error');
+      errorElement.style.display = 'none';
+      
       fetch('/auto-scan')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('networkRange').textContent = data.hostDiscovery.networkRange;
-          const resultsDiv = document.getElementById('results');
-          resultsDiv.innerHTML = '';
-
-          data.hostDiscovery.hosts.forEach(host => {
-            const hostDiv = document.createElement('div');
-            hostDiv.innerHTML = `
-              <h3>${host.ip} (${host.hostname || 'Unknown'})</h3>
-              <p>Status: ${host.status}</p>
-              <p>OS: ${host.os}</p>
-              <p>Open Ports:</p>
-              <ul>
-                ${host.openPorts.map(port => `<li>${port.port} (${port.service})</li>`).join('')}
-              </ul>
-            `;
-            resultsDiv.appendChild(hostDiv);
-          });
-
-          document.getElementById('loading').style.display = 'none';
-          resultsDiv.style.display = 'block';
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(data => Promise.reject(data));
+          }
+          return response.json();
         })
         .catch(error => {
-          document.getElementById('error').textContent = 'Error fetching scan results: ' + error.message;
-          document.getElementById('error').style.display = 'block';
-          document.getElementById('loading').style.display = 'none';
+          handleError('auto scan', error);
         });
     }
-
-    window.onload = fetchScanResults;
+    
+    // Update the scan status
+    function updateScanStatus() {
+      fetch('/scan-status')
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            handleError('status check', { error: data.error });
+            return;
+          }
+          
+          if (data.scanInProgress) {
+            // Update progress information
+            document.getElementById('loadingText').textContent = 
+              `Scanning host ${data.hostsScanned} of ${data.totalHosts} (${data.currentScan})...`;
+            
+            // Calculate progress percentage
+            const progressPercent = (data.hostsScanned / data.totalHosts) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            progressValue = progressPercent;
+            
+          } else if (data.complete) {
+            // Scan complete, get the results
+            clearInterval(scanInterval);
+            document.getElementById('loadingText').textContent = 'Scan complete! Loading results...';
+            document.getElementById('progressBar').style.width = '100%';
+            
+            // Fetch the detailed results
+            fetch('/scan-results')
+              .then(response => response.json())
+              .then(resultData => {
+                hosts = resultData.hosts;
+                displayResults();
+              })
+              .catch(error => {
+                handleError('getting results', error);
+              });
+          }
+        })
+        .catch(error => {
+          console.error('Error checking scan status:', error);
+        });
+    }
+    
+    // Manually refresh the status
+    function refreshStatus() {
+      updateScanStatus();
+    }
+    
+    // Display the final results
+    function displayResults() {
+      // Calculate scan duration
+      const scanDuration = Math.round((new Date() - scanStartTime) / 1000);
+      document.getElementById('scanTime').textContent = `Completed in ${scanDuration}s`;
+      
+      // Count identified OS and open ports
+      let osIdentifiedCount = 0;
+      let totalOpenPorts = 0;
+      
+      hosts.forEach(host => {
+        if (host.os !== 'Unknown') {
+          osIdentifiedCount++;
+        }
+        totalOpenPorts += host.openPorts.length;
+      });
+      
+      // Update summary counts
+      document.getElementById('osCount').textContent = osIdentifiedCount;
+      document.getElementById('portCount').textContent = totalOpenPorts;
+      
+      // Generate host cards
+      const hostsContainer = document.getElementById('hostsContainer');
+      hostsContainer.innerHTML = '';
+      
+      hosts.forEach(host => {
+        // Create host card
+        const hostCard = document.createElement('div');
+        hostCard.className = 'host-card';
+        
+        // Determine status class
+        const statusClass = host.status === 'Complete' ? 'status-complete' :
+                           host.status === 'Error' ? 'status-error' : 'status-pending';
+        
+        // Create card content
+        hostCard.innerHTML = `
+          <div class="host-header">
+            <div class="host-title">
+              <i class="fas fa-desktop"></i>
+              ${host.ip} ${host.hostname ? `(${host.hostname})` : ''}
+            </div>
+            <span class="host-status ${statusClass}">${host.status}</span>
+          </div>
+          <div class="host-body">
+            <div class="host-info">
+              <div class="info-item">
+                <div class="info-label">Operating System</div>
+                <div>${host.os}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Open Ports</div>
+                <div>${host.openPorts.length} ports detected</div>
+              </div>
+            </div>
+            
+            ${host.openPorts.length > 0 ? `
+              <h4>Open Ports & Services</h4>
+              <table class="port-table">
+                <thead>
+                  <tr>
+                    <th>Port</th>
+                    <th>Service</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${host.openPorts.map(port => `
+                    <tr>
+                      <td><span class="port-badge">${port.port}</span></td>
+                      <td>${port.service}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : ''}
+            
+            <button class="toggle-details" onclick="toggleHostDetails('${host.ip}')">
+              <i class="fas fa-code"></i> View Scan Details
+            </button>
+            
+            <div id="details-${host.ip.replace(/\./g, '-')}" class="host-details">
+              <div class="tab-container">
+                <div class="tab-buttons">
+                  <button class="tab-button active" onclick="showTab('${host.ip}', 'os')">OS Detection</button>
+                  <button class="tab-button" onclick="showTab('${host.ip}', 'ports')">Port Scan</button>
+                </div>
+                <div id="tab-${host.ip.replace(/\./g, '-')}-os" class="tab-content active">
+                  <div class="raw-output">${host.osDetectionOutput || 'No data available'}</div>
+                </div>
+                <div id="tab-${host.ip.replace(/\./g, '-')}-ports" class="tab-content">
+                  <div class="raw-output">${host.portScanOutput || 'No data available'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        hostsContainer.appendChild(hostCard);
+      });
+      
+      // Hide loading and show results
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
+    }
+    
+    // Toggle host details view
+    function toggleHostDetails(ip) {
+      const detailsId = `details-${ip.replace(/\./g, '-')}`;
+      const detailsElement = document.getElementById(detailsId);
+      
+      if (detailsElement.style.display === 'block') {
+        detailsElement.style.display = 'none';
+      } else {
+        detailsElement.style.display = 'block';
+      }
+    }
+    
+    // Show tab content
+    function showTab(ip, tabName) {
+      const ipSelector = ip.replace(/\./g, '-');
+      
+      // Hide all tab contents
+      document.querySelectorAll(`[id^="tab-${ipSelector}-"]`).forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(`tab-${ipSelector}-${tabName}`).classList.add('active');
+      
+      // Update tab buttons
+      const tabContainer = document.getElementById(`tab-${ipSelector}-${tabName}`).parentNode;
+      const buttons = tabContainer.querySelectorAll('.tab-button');
+      
+      buttons.forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      event.currentTarget.classList.add('active');
+    }
+    
+    // Handle errors
+    function handleError(action, error) {
+      const errorElement = document.getElementById('error');
+      let errorMessage = `An error occurred during the ${action}`;
+      
+      if (error.error) {
+        errorMessage += ': ' + error.error;
+      }
+      if (error.details) {
+        errorMessage += ' - ' + error.details;
+      }
+      
+      errorElement.textContent = errorMessage;
+      errorElement.style.display = 'block';
+      
+      // Hide loading
+      document.getElementById('loading').style.display = 'none';
+    }
   </script>
 </body>
 </html>

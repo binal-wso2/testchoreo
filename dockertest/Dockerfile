@@ -3,7 +3,7 @@ FROM node:18-slim
 
 # Install nmap
 RUN apt-get update && \
-    apt-get install -y nmap libcap2-bin && \
+    apt-get install -y nmap libcap2-bin net-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
