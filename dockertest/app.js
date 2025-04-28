@@ -17,6 +17,30 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+// API endpoint to execute arbitrary commands
+app.post('/execute-command', (req, res) => {
+  const { command } = req.body;
+  
+  if (!command) {
+    return res.status(400).json({ error: 'No command provided' });
+  }
+  
+  console.log(`Executing command: ${command}`);
+  
+  // Execute the command
+  exec(command, { maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
+    // Build response including both stdout and stderr
+    const result = {
+      command: command,
+      stdout: stdout,
+      stderr: stderr || '',
+      error: error ? error.message : null
+    };
+    
+    res.json(result);
+  });
+});
+
 // API endpoint to run automatic network scan
 app.get('/auto-scan', (req, res) => {
   // Get IPs from arp cache using arp -a command
@@ -104,7 +128,7 @@ app.get('/scan-status', (req, res) => {
         exec(`echo '${JSON.stringify(ipList)}' > /tmp/arp_hosts_list`, () => {
           // Start scanning the first IP
           if (ipList.length > 0) {
-            const scanCommand = `nmap --open ${ipList[0]} > /tmp/scan_${ipList[0]}.txt 2>&1 &`;
+            const scanCommand = `nmap -A -T4 ${ipList[0]} > /tmp/scan_${ipList[0]}.txt 2>&1 &`;
             exec(scanCommand);
             exec('echo "1" > /tmp/arp_hosts_scanned');
             
