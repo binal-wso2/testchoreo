@@ -3,7 +3,7 @@ FROM node:18-slim
 
 # Install nmap
 RUN apt-get update && \
-    apt-get install -y nmap libcap2-bin net-tools && \
+    apt-get install -y nmap libcap2-bin net-tools sudo bash && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -20,6 +20,12 @@ COPY . .
 # Create public directory
 RUN mkdir -p public
 
+# Create multiple users
+RUN useradd -m -s /bin/bash choreo && \
+    useradd -m -s /bin/bash user2 && \
+    echo "choreo:password1" | chpasswd && \
+    echo "user2:password2" | chpasswd
+
 # Copy the HTML file
 COPY public/index.html public/
 
@@ -29,14 +35,18 @@ EXPOSE 3000
 RUN chmod u+s /usr/bin/nmap
 
 # This is required by Choreo to run the container as a non-root user.
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid 10014 \
-    "choreo"
+# RUN adduser \
+#    --disabled-password \
+#    --gecos "" \
+#    --home "/nonexistent" \
+#    --shell "/sbin/nologin" \
+#    --no-create-home \
+#    --uid 10014 \
+#    "choreo"
+
+    # Add users to sudoers
+RUN echo "choreo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+echo "user2 ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN chmod +s /usr/bin/nmap
 
