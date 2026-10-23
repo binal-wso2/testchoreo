@@ -31,9 +31,9 @@ Add following keys as Google App Script properties [^1]
   * `AWS_CSPM_ACCESS_KEY_ID`: access key of the IAM user that assumes the reader roles
   * `AWS_CSPM_SECRET_ACCESS_KEY`: secret key of that IAM user
   * `AWS_CSPM_ACCOUNTS`: JSON array of accounts to collect from, e.g.
-    ``
+    ```
     [{"accountId":"111122223333","accountName":"prod","roleArn":"arn:aws:iam::111122223333:role/SecurityHubFindingsReader","externalId":"<random-string>","regions":["us-east-1"]}]
-    ``
+    ```
 
 * Inputs and outputs of the script:
   * `TENABLE_VULN_SHEET_ID` : Sheet ID for Tenable vulnerabilities
